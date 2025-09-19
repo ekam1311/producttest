@@ -1,0 +1,119 @@
+import csv
+import os
+
+PRODUCT_FILE = "products.csv"
+PAID_FILE = "paid_products.csv"
+
+def init_file(filename, headers):
+    """Create file with headers if it does not exist."""
+    if not os.path.exists(filename):
+        with open(filename, mode="w", newline="") as file:
+            writer = csv.writer(file)
+            writer.writerow(headers)
+
+def add_product():
+    """Add a new product to products.csv"""
+    name = input("Enter product name: ")
+    price = float(input("Enter price: "))
+    margin = float(input("Enter margin: "))
+    profit = price - margin
+
+    with open(PRODUCT_FILE, mode="a", newline="") as file:
+        writer = csv.writer(file)
+        writer.writerow([name, price, profit])
+
+    print(f"✅ {name} added successfully!\n")
+
+def view_file(filename, title):
+    """Display products from a file with totals"""
+    if not os.path.exists(filename):
+        print(f"No {title.lower()} found.\n")
+        return
+
+    with open(filename, mode="r") as file:
+        reader = list(csv.DictReader(file))
+
+    if not reader:
+        print(f"No {title.lower()} available.\n")
+        return
+
+    total_price = 0
+    total_profit = 0
+
+    print(f"\n--- {title} ---")
+    for row in reader:
+        name = row["Name"]
+        price = float(row["Price"])
+        profit = float(row["Profit"])
+        print(f"{name} | Price: {price} | Profit: {profit}")
+
+        total_price += price
+        total_profit += profit
+
+    print(f"TOTAL  | Price: {total_price} | Profit: {total_profit}\n")
+
+def mark_paid():
+    """Move paid products to paid_products.csv"""
+    if not os.path.exists(PRODUCT_FILE):
+        print("No products found.\n")
+        return
+
+    with open(PRODUCT_FILE, mode="r") as file:
+        reader = list(csv.DictReader(file))
+
+    unpaid = []
+    paid = []
+
+    for row in reader:
+        choice = input(f"Is '{row['Name']}' paid? (y/n): ").strip().lower()
+        if choice == "y":
+            paid.append(row)
+        else:
+            unpaid.append(row)
+
+    # Write unpaid back
+    with open(PRODUCT_FILE, mode="w", newline="") as file:
+        writer = csv.DictWriter(file, fieldnames=["Name", "Price", "Profit"])
+        writer.writeheader()
+        writer.writerows(unpaid)
+
+    # Append paid to paid file
+    with open(PAID_FILE, mode="a", newline="") as file:
+        writer = csv.DictWriter(file, fieldnames=["Name", "Price", "Profit"])
+        if os.stat(PAID_FILE).st_size == 0:
+            writer.writeheader()
+        writer.writerows(paid)
+
+    print("✅ Paid products moved successfully!\n")
+
+def menu():
+    """Main menu loop"""
+    init_file(PRODUCT_FILE, ["Name", "Price", "Profit"])
+    init_file(PAID_FILE, ["Name", "Price", "Profit"])
+
+    while True:
+        print("=== Product Manager ===")
+        print("1. Add Product")
+        print("2. View Products")
+        print("3. View Paid Products")
+        print("4. Mark Paid Products")
+        print("5. Exit")
+
+        choice = input("Choose an option (1-5): ").strip()
+
+        if choice == "1":
+            add_product()
+        elif choice == "2":
+            view_file(PRODUCT_FILE, "Unpaid Products")
+        elif choice == "3":
+            view_file(PAID_FILE, "Paid Products")
+        elif choice == "4":
+            mark_paid()
+        elif choice == "5":
+            print("Exiting program...")
+            break
+        else:
+            print("❌ Invalid choice. Try again.\n")
+
+# Run program
+menu()
