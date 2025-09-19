@@ -16,11 +16,11 @@ def add_product():
     name = input("Enter product name: ")
     price = float(input("Enter price: "))
     margin = float(input("Enter margin: "))
-    profit = price - margin
+    profit = margin   # ✅ profit is margin now
 
     with open(PRODUCT_FILE, mode="a", newline="") as file:
         writer = csv.writer(file)
-        writer.writerow([name, price, margin])
+        writer.writerow([name, price, profit])
 
     print(f"✅ {name} added successfully!\n")
 
