@@ -20,7 +20,7 @@ def add_product():
 
     with open(PRODUCT_FILE, mode="a", newline="") as file:
         writer = csv.writer(file)
-        writer.writerow([name, price, profit])
+        writer.writerow([name, price, margin])
 
     print(f"✅ {name} added successfully!\n")
 
